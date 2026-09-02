@@ -87,15 +87,6 @@ def garantir_coluna_notificado(conn):
 
 def obter_vagas_recomendadas():
     """Recupera as vagas marcadas como RECOMENDADO pela IA e que ainda não foram enviadas."""
-
-    # 🔥 MODO DE TESTE TEMPORÁRIO PARA FORÇAR ENVIO NA NUVEM 🔥
-    return [{
-        "titulo": "Estágio Júnior em Análise de Dados Financeiros (FEP Teste)",
-        "portal": "FEP Career Portal",
-        "link": "https://www.fep.up.pt",
-        "descricao": "Vaga de teste gerada automaticamente para validar a integração do GitHub Actions com o Gmail do Salvador!"
-    }]
-
     if not DB_PATH or not TABELA_VAGAS:
         print("❌ Erro: Não foi possível localizar a base de dados ou a tabela de vagas activa.")
         print("💡 Diagnóstico de caminhos verificados:")
