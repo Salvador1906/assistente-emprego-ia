@@ -18,12 +18,26 @@ def executar_modulo(nome_ficheiro):
         return False
 
     print(f"\n⚙️ A executar: {nome_ficheiro}...")
+    
+    # Solução de Engenharia de Sistemas para o erro ModuleNotFoundError: No module named 'database'
+    # Injetamos o caminho da raiz do projeto no PYTHONPATH do sub-processo
+    # Isso garante que qualquer script na pasta 'scrapers/' consiga importar de pastas na raiz (como 'database/')
+    diretorio_raiz = os.path.dirname(os.path.abspath(__file__))
+    env_sub = os.environ.copy()
+    
+    separador_path = ";" if sys.platform == "win32" else ":"
+    if "PYTHONPATH" in env_sub:
+        env_sub["PYTHONPATH"] = diretorio_raiz + separador_path + env_sub["PYTHONPATH"]
+    else:
+        env_sub["PYTHONPATH"] = diretorio_raiz
+
     try:
-        # Corre o script usando o mesmo interpretador de Python ativo
+        # Corre o script usando o mesmo interpretador de Python ativo e injetando o PYTHONPATH
         resultado = subprocess.run(
             [sys.executable, caminho_script],
             check=True,
-            text=True
+            text=True,
+            env=env_sub
         )
         print(f"✅ {nome_ficheiro} concluído com sucesso!")
         return True
@@ -37,11 +51,10 @@ def orquestrar_assistente():
     print("=" * 60)
 
     # 1. BLOCO 1 & 2: O EXTRATOR E A MEMÓRIA
-    # Aqui, o orquestrador corre os teus scrapers para popular a base de dados SQLite
-    # Podes adicionar os teus scrapers locais aqui conforme a tua arquitetura
+    # Configurado com os nomes exatos de ficheiro detetados na tua pasta scrapers/
     scrapers = [
-        os.path.join("scrapers", "net_empregos.py"),
-        os.path.join("scrapers", "fep_portal.py")
+        os.path.join("scrapers", "scraper_net_empregos.py"),
+        os.path.join("scrapers", "scraper_fep.py")
     ]
     
     scrapers_executados = 0
