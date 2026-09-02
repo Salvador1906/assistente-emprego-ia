@@ -1,1 +1,31 @@
+# ==============================================================================
+# .gitignore para o repositório "assistente-emprego-ia"
+# ==============================================================================
+
+# 1. VARIÁVEIS DE AMBIENTE LOCAIS (Chaves de API, emails e palavras-passe!)
 .env
+
+# 2. BASE DE DADOS SQLITE LOCAL (A nuvem cria a sua própria base de dados)
+*.db
+database/assistente.db
+
+# 3. CREDENCIAIS DE SEGURANÇA (Caso uses integração Sheets futuramente)
+credentials.json
+
+# 4. Ficheiros de configuração e lixo do macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r
+._*
+
+# 5. Ficheiros compilados e temporários do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 6. Ambientes virtuais locais
+venv/
+.venv/
+env/
