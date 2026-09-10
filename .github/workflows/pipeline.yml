@@ -1,0 +1,55 @@
+name: Execucao Diario Assistente Emprego IA
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # 07:00 UTC = 08:00 em Portugal (execução matinal automática)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  executar_assistente:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Copiar Codigo do Repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar o Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    # 💾 MEMÓRIA DO ROBÔ: Preserva a base de dados SQLite entre execuções
+    - name: Restaurar Memoria do Assistente (SQLite Cache)
+      uses: actions/cache@v4
+      with:
+        path: |
+          assistente.db
+          database/assistente.db
+          vagas.db
+          database/vagas.db
+        key: assistente-db-${{ github.run_id }}
+        restore-keys: |
+          assistente-db-
+
+    - name: Instalar Dependencias de Python
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    # 🌐 Instala o Chromium do Playwright e as bibliotecas gráficas do Linux
+    - name: Instalar Navegadores do Playwright
+      run: |
+        python -m playwright install --with-deps chromium
+
+    - name: Executar a Triagem e Enviar Newsletter
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        EMAIL_DEST: ${{ secrets.EMAIL_DEST }}
+      run: |
+        xvfb-run python app.py
