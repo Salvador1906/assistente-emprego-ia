@@ -2,36 +2,51 @@ name: Execucao Diario Assistente Emprego IA
 
 on:
   push:
-    branches: [ main ]      # Executa automaticamente sempre que fazes 'git push' (ótimo para testar!)
+    branches: [main]
   schedule:
-    - cron: '0 9 * * *'     # Executa todos os dias às 09:00 UTC
-  workflow_dispatch:        # Permite correr manualmente no site do GitHub a qualquer hora
+    # 07:00 UTC = 08:00 em Portugal (mesmo com atrasos do GitHub, dispara durante a manhã)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
 
 jobs:
   executar_assistente:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Copiar Codigo do Repositorio
-      uses: actions/checkout@v4
+      - name: Copiar Codigo do Repositorio
+        uses: actions/checkout@v4
 
-    - name: Configurar o Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        cache: 'pip'
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
 
-    - name: Instalar Dependencias
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      # 💾 A MEMÓRIA DO ROBÔ: Preserva a base de dados SQLite entre execuções diárias
+      - name: Restaurar Memoria do Assistente (SQLite Cache)
+        uses: actions/cache@v4
+        with:
+          path: |
+            assistente.db
+            database/assistente.db
+            vagas.db
+            database/vagas.db
+          key: assistente-db-${{ github.run_id }}
+          restore-keys: |
+            assistente-db-
 
-    - name: Executar a Triagem e Enviar Newsletter
-      env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        EMAIL_USER: ${{ secrets.EMAIL_USER }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        EMAIL_DEST: ${{ secrets.EMAIL_DEST }}
-      run: |
-        # Executa o teu orquestrador unificado app.py que trata de todo o pipeline!
-        python app.py
+      - name: Instalar Dependencias
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Executar a Triagem e Enviar Newsletter
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_DEST: ${{ secrets.EMAIL_DEST }}
+        run: |
+          python app.py
+

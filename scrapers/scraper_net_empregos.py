@@ -32,10 +32,8 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
                 print(f"❌ Erro ao aceder à listagem (Pág {num_pagina}): Status {resposta.status_code}")
                 continue
 
-            # 💡 A LINHA MÁGICA: Forçar a codificação nativa do Net-Empregos
-            resposta.encoding = 'iso-8859-1' 
 
-            sopa = BeautifulSoup(resposta.text, "html.parser")
+            sopa = BeautifulSoup(resposta.content, "html.parser", from_encoding="cp1252")
             
             # Captura os cartões de cada vaga
             cartoes = sopa.find_all("div", class_="job-item")
