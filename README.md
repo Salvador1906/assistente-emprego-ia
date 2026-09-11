@@ -1,3 +1,5 @@
+
+
 # 💼 Assistente de Emprego Inteligente com IA (AI Career Assistant)
 
 Um pipeline automático *end-to-end* desenvolvido em Python que monitoriza portais de emprego, utiliza Inteligência Artificial (Google Gemini) para avaliar e filtrar de forma pragmática as melhores ofertas de acordo com o perfil do candidato, e envia um resumo diário formatado em HTML por e-mail.
@@ -6,7 +8,7 @@ Um pipeline automático *end-to-end* desenvolvido em Python que monitoriza porta
 
 ## 🎬 Demonstração em Vídeo (1 min 25s)
 
-> **[Insira aqui o link do vídeo de demonstração]**
+> **https://youtu.be/q1fcMpDWdDA**
 
 *O vídeo demonstra a execução completa do pipeline: extração nos portais de emprego, triagem e decisão da IA, verificação de duplicados em base de dados SQLite e receção da newsletter por e-mail.*
 
