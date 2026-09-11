@@ -69,7 +69,7 @@ DECISAO: [RECOMENDADO ou IGNORADO] | MOTIVO: [Explicação curta de 1 frase em p
 
 1. **Clonar o repositório:**
    ```bash
-   git clone https://github.com/o-teu-utilizador/assistente-emprego-ia.git
+   git clone https://github.com/Salvador1906/assistente-emprego-ia.git
    cd assistente-emprego-ia
    ```
 
