@@ -13,9 +13,12 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
     
     # Disfarce para evitar bloqueios do servidor
     headers_base = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Referer": "https://www.google.pt/",
     }
-    
+
     # BLINDAGEM DE ÍNDICES: Variáveis para evitar colisões com Markdown
     idx_0 = 0
     idx_1 = 1

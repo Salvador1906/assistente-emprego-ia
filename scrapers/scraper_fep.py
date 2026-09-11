@@ -30,6 +30,11 @@ def extrair_vagas_fep() -> list:
         time.sleep(2)
         
         print("🔑 A simular o login...")
+
+        if not FEP_EMAIL or not FEP_PASSWORD:
+            print("❌ Erro: As credenciais FEP_EMAIL ou FEP_PASSWORD não estão definidas no ambiente.")
+            return []
+
         try:
             if page.is_visible("#authIconID"):
                 print("📱 Ecrã mobile detetado. A clicar no botão para revelar formulário...")

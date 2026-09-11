@@ -51,5 +51,7 @@ jobs:
         EMAIL_USER: ${{ secrets.EMAIL_USER }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         EMAIL_DEST: ${{ secrets.EMAIL_DEST }}
+        FEP_EMAIL: ${{ secrets.FEP_EMAIL }}
+        FEP_PASSWORD: ${{ secrets.FEP_PASSWORD }}
       run: |
         xvfb-run python app.py
