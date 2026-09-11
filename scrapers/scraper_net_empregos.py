@@ -11,13 +11,22 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
 		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
 		"Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-		"Referer": "https://www.google.pt/",
+		"Referer": "https://www.net-empregos.com/"
 	}
+
+	# 🔑 USO DE SESSÃO: Mantém os cookies entre pedidos para o Net-Empregos não redirecionar para Login
+	session = requests.Session(impersonate="chrome110")
+	try:
+		print("\n🌐 A estabelecer sessão inicial no Net-Empregos...")
+		session.get("https://www.net-empregos.com/", headers=headers, timeout=30)
+		time.sleep(1)
+	except Exception as e_init:
+		print(f"⚠️ Aviso ao estabelecer sessão inicial: {e_init}")
 
 	cartoes_mapeados = []
 
 	# ------------------------------------------------------------------
-	# FASE 1: Mapear cartões de todas as páginas primeiro (requisições leves)
+	# FASE 1: Mapear cartões de todas as páginas usando a mesma sessão
 	# ------------------------------------------------------------------
 	for num_pagina in range(1, paginas + 1):
 		if num_pagina == 1:
@@ -25,20 +34,19 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 		else:
 			url = f"https://www.net-empregos.com/emprego-gestao-empresas-economia.asp?page={num_pagina}"
 
-		headers["Referer"] = "https://www.net-empregos.com/emprego-gestao-empresas-economia.asp"
 		print(f"\n🌐 [Página {num_pagina}/{paginas}] A iniciar leitura de: {url}")
 		try:
-			time.sleep(1.5)  # Pausa tática para não disparar o firewall
-			resposta = requests.get(url, headers=headers, impersonate="chrome110", timeout=30)
+			time.sleep(1.5)
+			resposta = session.get(url, headers=headers, timeout=30)
 			if resposta.status_code != 200:
 				print(f"❌ Erro ao aceder à página {num_pagina}: Status {resposta.status_code}")
 				continue
 
 			sopa = BeautifulSoup(resposta.content, "html.parser", from_encoding="cp1252")
-			# Verifica se o servidor tentou empurrar para a página de login
-			titulo_pag = sopa.title.string.strip() if sopa.title else ""
-			if "Login" in titulo_pag:
-				print(f" ⚠️ Página {num_pagina} redirecionou para Login. A ignorar...")
+
+			# Confirmação de segurança caso redirecione para a página de login
+			if "loginc.asp" in resposta.url or (sopa.title and "Login" in sopa.title.string):
+				print(f" ⚠️ Página {num_pagina} redirecionou para Login.")
 				continue
 
 			cartoes = sopa.find_all("div", class_="job-item")
@@ -55,15 +63,17 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 
 				elementos_li = cartao.find_all("li")
 				localizacao = elementos_li[1].get_text().strip() if len(elementos_li) > 1 else "N/D"
-				empresa = elementos_li[2].get_text().strip() if len(elementos_li) > 3 else "N/D"
+				empresa = elementos_li[2].get_text().strip() if len(elementos_li) > 2 else "N/D"
 
 				cartoes_mapeados.append({
 					"link": link_completo,
 					"titulo": titulo,
 					"empresa": empresa,
 					"localizacao": localizacao,
-					"url_origem": url,
+					"url_origem": url
 				})
+
+			headers["Referer"] = url
 		except Exception as e_pagina:
 			print(f"❌ Falha ao ler a página {num_pagina}: {e_pagina}")
 			continue
@@ -71,7 +81,7 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 	print(f"\n📌 Mapeados {len(cartoes_mapeados)} anúncios no total. A extrair detalhes...")
 
 	# ------------------------------------------------------------------
-	# FASE 2: Abrir os detalhes de cada vaga individualmente
+	# FASE 2: Abrir os detalhes de cada vaga individualmente na sessão
 	# ------------------------------------------------------------------
 	for idx, item in enumerate(cartoes_mapeados, 1):
 		try:
@@ -79,7 +89,7 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 			headers_detalhe = headers.copy()
 			headers_detalhe["Referer"] = item["url_origem"]
 			time.sleep(1)
-			resposta_vaga = requests.get(item["link"], headers=headers_detalhe, impersonate="chrome110", timeout=30)
+			resposta_vaga = session.get(item["link"], headers=headers_detalhe, timeout=30)
 
 			descricao = "Descrição indisponível."
 			if resposta_vaga.status_code == 200:
@@ -97,7 +107,6 @@ def extrair_vagas_netempregos(paginas: int = 2) -> list:
 					or sopa_vaga.find("span", id="Noticia")
 					or sopa_vaga.find("article")
 				)
-
 				if elem_desc:
 					descricao = elem_desc.get_text(separator="\n").strip()
 
